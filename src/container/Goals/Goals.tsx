@@ -68,10 +68,10 @@ const Goals = () => {
           </VStack>
           <HStack alignItems="center" space={1}>
             <Text bold color="secondary.400" fontSize="sm">
-              PHP 952.00
+              ₱952.00
             </Text>
             <Text bold color="warmGray.500" fontSize="sm">
-              of PHP 952.00
+              of ₱952.00
             </Text>
           </HStack>
         </VStack>
@@ -79,9 +79,9 @@ const Goals = () => {
           <Heading size="md">Last Transactions</Heading>
         </HStack>
         <VStack space={2}>
-          <Card />
-          <Card />
-          <Card />
+          <Card icon="piggy-bank-outline" />
+          <Card icon="piggy-bank-outline" />
+          <Card icon="piggy-bank-outline" />
         </VStack>
       </VStack>
       <BottomNavigation />

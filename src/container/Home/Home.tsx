@@ -1,103 +1,126 @@
-import 'react-native-gesture-handler';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  NativeBaseProvider,
   Box,
   Text,
-  Icon,
   Heading,
-  Stack,
   VStack,
   HStack,
-  Button,
-  ChevronDownIcon,
-  Avatar,
-  IconButton,
+  FlatList,
+  Pressable,
+  Icon,
 } from 'native-base';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
-
-import {Dimensions} from 'react-native';
-const screenWidth = Dimensions.get('window').width;
 import {BarChart} from 'react-native-gifted-charts';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import moment from 'moment';
+import {isEmpty, groupBy, sumBy, isEqual} from 'lodash';
+import {useIsFocused} from '@react-navigation/native';
+
 import {AppHeader, BottomNavigation, Card} from '../../components';
+import {HomeScreenProps} from '../../types/navigation/types';
+import {Form} from '../components';
+import {globalStyle} from '../../styles/styles';
+import {RealmContext} from '../../models';
+import {Account} from '../../models/Account';
+import {Expense} from '../../models/Expense';
+import {formatAmount, formatTotalAmount} from '../../utils/utils';
+const {useRealm} = RealmContext;
 
-const barData = [
-  {
-    value: 250,
-    label: 'Jan',
-    labelTextStyle: {color: '#616566', textAlign: 'center'},
-    topLabelComponent: () => (
-      <Text fontSize="xs" bold color="#616566">
-        P250
-      </Text>
-    ),
-  },
-  {
-    value: 500,
-    label: 'Feb',
-    labelTextStyle: {color: '#616566', textAlign: 'center'},
-    topLabelComponent: () => (
-      <Text fontSize="xs" bold color="#616566">
-        P500
-      </Text>
-    ),
-  },
-  {
-    value: 745,
-    label: 'Mar',
-    frontColor: '#8032f9',
-    labelTextStyle: {color: '#8032f9', textAlign: 'center'},
-    topLabelComponent: () => (
-      <Text fontSize="xs" bold color="#616566">
-        P745
-      </Text>
-    ),
-  },
-  {
-    value: 320,
-    label: 'Apr',
-    labelTextStyle: {color: '#616566', textAlign: 'center'},
-    topLabelComponent: () => (
-      <Text fontSize="xs" bold color="#616566">
-        P320
-      </Text>
-    ),
-  },
-  {
-    value: 600,
-    label: 'May',
-    labelTextStyle: {color: '#616566', textAlign: 'center'},
-    topLabelComponent: () => (
-      <Text fontSize="xs" bold color="#616566">
-        P600
-      </Text>
-    ),
-  },
-  {
-    value: 256,
-    label: 'June',
-    labelTextStyle: {color: '#616566', textAlign: 'center'},
-    topLabelComponent: () => (
-      <Text fontSize="xs" bold color="#616566">
-        P256
-      </Text>
-    ),
-  },
-];
+type ObjectClassExpense<Expense> = Expense;
 
-const Home = () => {
+const Home = ({navigation}: HomeScreenProps) => {
+  const realm = useRealm();
+  const isFocused = useIsFocused();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState({
+    start: moment().startOf('year').format('YYYY-MM-DD 00:00:00'),
+    end: moment().endOf('month').format('YYYY-MM-DD 23:59:59'),
+  });
+  const [recentExpense, setRecentExpense] = useState<ObjectClassExpense<any>[]>(
+    [],
+  );
+  const [yearExpense, setYearExpense] = useState<any>([]);
+
+  const getRecentExpense = () => {
+    const expenseData = realm.objects(Expense).sorted('date', true).slice(0, 5);
+    setRecentExpense([...expenseData]);
+  };
+
+  const getYearExpense = () => {
+    const expense = realm
+      .objects(Expense)
+      .filtered(
+        'date >= $0 && date <= $1',
+        moment(selectedDate.start).toDate(),
+        moment(selectedDate.end).toDate(),
+      )
+      .sorted('date', true);
+
+    const groupedData = groupBy(expense, item => {
+      const date = new Date(item.date);
+      const month = date.toLocaleString('default', {month: 'short'});
+      return month;
+    });
+
+    const monthlyTotals = [];
+
+    for (let i = 0; i < moment(selectedDate.end).month() + 1; i++) {
+      const month = moment(selectedDate.start)
+        .clone()
+        .add(i, 'months')
+        .format('MMM');
+      const monthData = groupedData[month] || [];
+      const totalAmount = sumBy(monthData, 'amount');
+      monthlyTotals.push({month, totalAmount});
+    }
+
+    let highestMonth = '';
+    let highestAmount = 0;
+
+    for (const monthData of monthlyTotals) {
+      if (monthData.totalAmount > highestAmount) {
+        highestMonth = monthData.month;
+        highestAmount = monthData.totalAmount;
+      }
+    }
+
+    const data = monthlyTotals.map(item => ({
+      value: item.totalAmount,
+      label: item.month,
+      frontColor: isEqual(item.month, highestMonth) ? '#8032f9' : undefined,
+      labelTextStyle: {
+        color: isEqual(item.month, highestMonth) ? '#8032f9' : '#616566',
+        textAlign: 'center',
+      },
+      topLabelComponent: () => (
+        <Text fontSize="xs" bold color="#616566">
+          {`₱${formatTotalAmount(item.totalAmount)}`}
+        </Text>
+      ),
+    }));
+    setYearExpense(data);
+  };
+
+  useEffect(() => {
+    getRecentExpense();
+  }, [isModalOpen, isFocused]);
+
+  useEffect(() => {
+    getYearExpense();
+  }, [selectedDate, isModalOpen, isFocused]);
+
   return (
     <Box flex={1} safeAreaTop bgColor="#ffffff">
       <AppHeader label="Home" />
-      <Box h="30%" p={5} justifyContent="center">
+      <Form isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <Box h="25%" p={5} justifyContent="center">
         <VStack space={3}>
           <Box bgColor="tertiary.400" p={8} borderRadius="2xl">
             <Text fontSize="md" fontWeight="900" color="#616566">
               Total Balance
             </Text>
             <Heading mt={1} color="white">
-              PHP 30,300.00
+              ₱0.00
             </Heading>
             <Box mt="5">
               <LinearGradient
@@ -114,25 +137,36 @@ const Home = () => {
       <VStack space={3} justifyContent="center">
         <HStack px={5} alignItems="center" justifyContent="space-between">
           <Heading size="md">Analytics</Heading>
-          <HStack
-            bgColor="primary.400"
-            px="3"
-            py="1"
-            borderRadius="md"
-            space="2"
-            alignItems="center">
-            <Text fontSize="sm" fontWeight="600" color="white">
-              Year - 2022
-            </Text>
-            <ChevronDownIcon size="sm" color="white" />
-          </HStack>
+          <Pressable onPress={() => console.log('d')}>
+            {({isPressed}) => {
+              return (
+                <HStack
+                  bgColor={isPressed ? 'primary.100' : 'primary.400'}
+                  px="3"
+                  py="1"
+                  borderRadius="md"
+                  space="2"
+                  alignItems="center">
+                  <Text fontSize="sm" fontWeight="600" color="white">
+                    Year - 2022
+                  </Text>
+                  <Icon
+                    as={MaterialCommunityIcons}
+                    name="calendar-outline"
+                    color="white"
+                    size="sm"
+                  />
+                </HStack>
+              );
+            }}
+          </Pressable>
         </HStack>
         <Box mr={10}>
           <BarChart
             barWidth={45}
             barBorderRadius={5}
             frontColor="lightgray"
-            data={barData}
+            data={yearExpense}
             yAxisThickness={0}
             xAxisThickness={0}
             hideYAxisText={true}
@@ -142,16 +176,47 @@ const Home = () => {
           />
         </Box>
       </VStack>
-      <VStack space={3} flex={1} p={5}>
+      <VStack space={3} flex={1} px={5}>
         <HStack alignItems="center" justifyContent="space-between">
           <Heading size="md">Expenses</Heading>
-          <Text fontSize="sm" fontWeight="600" color="warmGray.700">
-            View All
-          </Text>
+          <Pressable onPress={() => navigation.navigate('Expenses')}>
+            {({isPressed}) => {
+              return (
+                <Text
+                  fontSize="sm"
+                  fontWeight="600"
+                  color={isPressed ? 'primary.400' : 'warmGray.700'}>
+                  View All
+                </Text>
+              );
+            }}
+          </Pressable>
         </HStack>
-        <Card />
+        <FlatList
+          data={recentExpense}
+          renderItem={({item}) => (
+            <Card
+              icon="currency-php"
+              amount={formatAmount(item.amount)}
+              description={item.description}
+              date={moment(item.date).format('ddd, MMM DD YYYY')}
+              handlePress={() => {}}
+            />
+          )}
+          contentContainerStyle={
+            isEmpty(recentExpense) && globalStyle.emptyFlatList
+          }
+          ListEmptyComponent={() => (
+            <Heading size="sm" color="warmGray.400">
+              No recent expenses.
+            </Heading>
+          )}
+        />
       </VStack>
-      <BottomNavigation />
+      <BottomNavigation
+        activeId={1}
+        handlePressAdd={() => setIsModalOpen(true)}
+      />
     </Box>
   );
 };

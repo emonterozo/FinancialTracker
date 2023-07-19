@@ -21,12 +21,12 @@ import {Card, AppHeader, BottomNavigation} from '../../components';
 const Debt = () => {
   return (
     <Box flex={1} safeAreaTop bgColor="#ffffff">
-      <AppHeader label="Sample" />
+      <AppHeader label="Debt" />
       <VStack flex={1} space={5} mt={10}>
         <VStack space={3} flex={1} p={5}>
-          <Card />
-          <Card />
-          <Card />
+          <Card icon="account-cash" />
+          <Card icon="account-cash" />
+          <Card icon="account-cash" />
         </VStack>
         <BottomNavigation />
       </VStack>

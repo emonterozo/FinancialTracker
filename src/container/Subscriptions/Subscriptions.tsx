@@ -1,79 +1,125 @@
-import 'react-native-gesture-handler';
-import React from 'react';
-import {
-  NativeBaseProvider,
-  Box,
-  Text,
-  Icon,
-  Heading,
-  Stack,
-  VStack,
-  HStack,
-  Button,
-  ChevronDownIcon,
-  Avatar,
-  IconButton,
-  FlatList,
-} from 'native-base';
+import React, {useState} from 'react';
+import {Box, Icon, VStack, FlatList, IconButton, HStack} from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import LinearGradient from 'react-native-linear-gradient';
-import {Card, AppHeader, BottomNavigation} from '../../components';
+import {isEmpty} from 'lodash';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+
+import {
+  AppHeader,
+  BottomNavigation,
+  Card,
+  EmptyData,
+  ConfirmationDialog,
+} from '../../components';
+import {globalStyle} from '../../styles/styles';
+
+const ACTIONS = [
+  {
+    id: 1,
+    icon: 'credit-card-outline',
+    color: 'primary.500',
+    action: 'pay',
+  },
+  {
+    id: 2,
+    icon: 'trash-can-outline',
+    color: 'error.500',
+    action: 'delete',
+  },
+];
+
+const CONFIRMATION: any = {
+  pay: {
+    header: 'Pay Subscription',
+    body: 'Are you sure you want to pay this subscription?',
+  },
+  delete: {
+    header: 'Delete Subscription',
+    body: 'Are you sure you want to delete this subscription?',
+  },
+};
 
 const Subscriptions = () => {
+  let row: Array<any> = [];
+  let prevOpenedRow: any;
+  const [subscriptions, setSubscriptions] = useState([1, 2, 3, 4]);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [action, setAction] = useState('pay');
+
+  const handlePressAction = (value: string) => {
+    setAction(value);
+    setIsConfirmationOpen(true);
+  };
+
+  const renderSubscription = ({item, index}) => {
+    const closeRow = (i: number) => {
+      if (prevOpenedRow && prevOpenedRow !== row[i]) {
+        prevOpenedRow.close();
+      }
+      prevOpenedRow = row[i];
+    };
+
+    const renderRightActions = () => {
+      return (
+        <HStack alignItems="center" m={2} space={2}>
+          {ACTIONS.map(item => (
+            <IconButton
+              key={item.id}
+              icon={
+                <Icon
+                  color="white"
+                  as={MaterialCommunityIcons}
+                  name={item.icon}
+                />
+              }
+              bg={item.color}
+              size="lg"
+              onPress={() => handlePressAction(item.action)}
+            />
+          ))}
+        </HStack>
+      );
+    };
+
+    return (
+      <Swipeable
+        renderRightActions={() => renderRightActions()}
+        onSwipeableOpen={() => closeRow(index)}
+        ref={ref => (row[index] = ref)}>
+        <Card
+          icon="calendar-month"
+          amount="3,000.00"
+          date="17th of the month"
+          description="Internet"
+        />
+      </Swipeable>
+    );
+  };
+
   return (
     <Box flex={1} safeAreaTop bgColor="#ffffff">
       <AppHeader label="Subscriptions" />
+      <ConfirmationDialog
+        isOpen={isConfirmationOpen}
+        setIsOpen={setIsConfirmationOpen}
+        header={CONFIRMATION[action].header}
+        body={CONFIRMATION[action].body}
+        positiveButtonLabel="Yes"
+        negativeButtonLabel="Cancel"
+        handlePressNegative={() => {}}
+        handlePressPositive={() => {}}
+      />
       <VStack flex={1} space={5} mt={10} p={5}>
-        <Box flex={1} bgColor="white" justifyContent="center">
-          <FlatList
-            data={[1, 2, 3]}
-            renderItem={() => (
-              <VStack
-                w="46%"
-                m="2%"
-                style={{
-                  shadowColor: '#000',
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 3.84,
-                  elevation: 5,
-                }}
-                bgColor="#fafafa"
-                p={3}
-                space={2}
-                borderRadius="lg">
-                <Avatar
-                  alignSelf="center"
-                  size="lg"
-                  bg="indigo.500"
-                  source={{
-                    uri: 'https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
-                  }}>
-                  JB
-                </Avatar>
-                <VStack>
-                  <Text
-                    bold
-                    color="black"
-                    fontSize="lg"
-                    letterSpacing="sm"
-                    numberOfLines={1}>
-                    Converge Internet
-                  </Text>
-                  <Text bold color="secondary.400" fontSize="sm">
-                    PHP 952.00
-                  </Text>
-                </VStack>
-              </VStack>
-            )}
-            numColumns={2}
-          />
-        </Box>
+        <FlatList
+          data={subscriptions}
+          renderItem={renderSubscription}
+          contentContainerStyle={
+            isEmpty(subscriptions) && globalStyle.emptyFlatList
+          }
+          ListEmptyComponent={<EmptyData />}
+        />
       </VStack>
-      <BottomNavigation />
+      <BottomNavigation activeId={2} handlePressAdd={() => {}} />
     </Box>
   );
 };
