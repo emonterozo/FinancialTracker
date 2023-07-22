@@ -111,7 +111,12 @@ const Expenses = () => {
           });
         }}
       />
-      <Form isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <Form
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        type="Income"
+        action="New"
+      />
       <VStack flex={1} space={5} mt={10}>
         <Box px={5}>
           <HStack justifyContent="space-between" space={3} alignItems="center">

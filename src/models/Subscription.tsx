@@ -4,6 +4,7 @@ import {Category} from './Category';
 export class Subscription extends Realm.Object<Subscription> {
   _id!: Realm.BSON.UUID;
   date!: Date;
+  description!: string;
   amount!: number;
   status!: string;
   category!: Category;
@@ -13,6 +14,7 @@ export class Subscription extends Realm.Object<Subscription> {
     properties: {
       _id: 'uuid',
       date: 'date',
+      description: 'string',
       amount: 'float',
       status: 'string',
       category: 'Category',

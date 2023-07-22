@@ -11,17 +11,23 @@ import {
 import moment from 'moment';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
-import {has, isEqual, omit} from 'lodash';
+import {has, isEqual, isEmpty} from 'lodash';
 
 import {DatePicker, Picker} from '../../../components';
 import {RealmContext} from '../../../models';
 import {Category} from '../../../models/Category';
+import {Subscription} from '../../../models/Subscription';
 import {IOption} from '../../../types/components/types';
 const {useQuery, useRealm} = RealmContext;
+
+type ObjectClassSubscription<Subscription> = Subscription;
 
 interface IForm {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
+  type: 'Expense' | 'Subscription' | 'Income';
+  action: 'New' | 'Edit';
+  subscription?: ObjectClassSubscription<any>;
 }
 
 const TYPES = [
@@ -33,14 +39,25 @@ const TYPES = [
     label: 'Income',
     value: 'Income',
   },
+  {
+    label: 'Subscription',
+    value: 'Subscription',
+  },
 ];
 
-const Form = ({isOpen, setIsOpen}: IForm) => {
-  const categories = useQuery(Category);
-  const realm = useRealm();
-  const [categoryOptions, setCategoryOptions] = useState<IOption[]>([]);
+const STATUS = [
+  {
+    label: 'Active',
+    value: 'Active',
+  },
+  {
+    label: 'Inactive',
+    value: 'Inactive',
+  },
+];
 
-  const formik = useFormik({
+const TYPE = {
+  Expense: {
     initialValues: {
       type: 'Expense',
       date: moment().format('YYYY-MM-DD'),
@@ -56,42 +73,115 @@ const Form = ({isOpen, setIsOpen}: IForm) => {
       amount: Yup.number()
         .typeError('Please enter a valid number')
         .required('This is a required field'),
-      category: Yup.string().test(
-        'isRequired',
-        'This is a required field',
-        function (value) {
-          const {type} = this.parent;
-          if (type === 'Expense') {
-            return Yup.string().required().isValidSync(value);
-          }
-          return true;
-        },
-      ),
+      category: Yup.string().required('This is a required field'),
       notes: Yup.string(),
     }),
-    onSubmit: values => {
-      let data = {
-        _id: new Realm.BSON.UUID(),
-        date: moment(values.date).toDate(),
-        description: values.description,
-        amount: +parseFloat(values.amount).toFixed(2),
-        category: realm.objectForPrimaryKey('Category', values.category),
-        notes: values.notes,
-      };
-      if (isEqual(values.type, 'Expense')) {
-        realm.write(() => {
-          realm.create('Expense', data);
-        });
+  },
+  Subscription: {
+    initialValues: {
+      type: 'Subscription',
+      date: moment().format('YYYY-MM-DD'),
+      description: '',
+      amount: '',
+      category: '',
+      status: 'Active',
+      notes: '',
+    },
+    validationSchema: Yup.object({
+      type: Yup.string().required('This is a required field'),
+      date: Yup.string().required('This is a required field'),
+      description: Yup.string().required('This is a required field'),
+      amount: Yup.number()
+        .typeError('Please enter a valid number')
+        .required('This is a required field'),
+      category: Yup.string().required('This is a required field'),
+      status: Yup.string().required('This is a required field'),
+      notes: Yup.string(),
+    }),
+  },
+  Income: {
+    initialValues: {
+      type: 'Income',
+      date: moment().format('YYYY-MM-DD'),
+      description: '',
+      amount: '',
+      notes: '',
+    },
+    validationSchema: Yup.object({
+      type: Yup.string().required('This is a required field'),
+      date: Yup.string().required('This is a required field'),
+      description: Yup.string().required('This is a required field'),
+      amount: Yup.number()
+        .typeError('Please enter a valid number')
+        .required('This is a required field'),
+      notes: Yup.string(),
+    }),
+  },
+};
+
+const Form = ({isOpen, setIsOpen, type, action, subscription}: IForm) => {
+  const categories = useQuery(Category);
+  const realm = useRealm();
+  const [categoryOptions, setCategoryOptions] = useState<IOption[]>([]);
+
+  const formik = useFormik({
+    ...TYPE[type],
+    onSubmit: async values => {
+      if (isEqual(action, 'Edit')) {
+        const object = realm.objectForPrimaryKey(
+          Subscription,
+          subscription._id,
+        );
+
+        if (object) {
+          realm.write(() => {
+            (object.date = moment(values.date).toDate()),
+              (object.description = values.description),
+              (object.amount = +parseFloat(values.amount).toFixed(2)),
+              (object.category = realm.objectForPrimaryKey(
+                'Category',
+                values?.category,
+              )),
+              (object.status = values?.status),
+              (object.notes = values.notes);
+          });
+        }
       } else {
-        console.log(data);
+        let data = {
+          _id: new Realm.BSON.UUID(),
+          date: moment(values.date).toDate(),
+          description: values.description,
+          amount: +parseFloat(values.amount).toFixed(2),
+          category: realm.objectForPrimaryKey('Category', values?.category),
+          status: values?.status,
+          notes: values.notes,
+        };
+
         realm.write(() => {
-          realm.create('Income', omit(data, 'category'));
+          realm.create(values.type, data);
         });
       }
+
       formik.resetForm();
       setIsOpen(false);
     },
   });
+
+  useEffect(() => {
+    if (subscription && !isEmpty(categoryOptions)) {
+      for (const key in subscription) {
+        if (isEqual(key, 'category')) {
+        } else if (isEqual(key, 'date')) {
+          formik.setFieldValue(
+            key,
+            moment(subscription[key]).format('YYYY-MM-DD'),
+          );
+        } else {
+          formik.setFieldValue(key, subscription[key].toString());
+        }
+      }
+    }
+  }, [subscription, categoryOptions]);
 
   useEffect(() => {
     const formattedCategories = categories.map(item => ({
@@ -123,18 +213,20 @@ const Form = ({isOpen, setIsOpen}: IForm) => {
     <Modal size="xl" isOpen={isOpen} onClose={dismiss}>
       <Modal.Content>
         <Modal.CloseButton />
-        <Modal.Header>{`New ${formik.values.type}`}</Modal.Header>
+        <Modal.Header>{`${action} ${formik.values.type}`}</Modal.Header>
         <Modal.Body>
           <VStack space={2}>
-            <FormControl>
-              <FormControl.Label>Type</FormControl.Label>
-              <Picker
-                placeholder="Choose Type"
-                options={TYPES}
-                selectedValue={formik.values.type}
-                handlePressSelect={value => handleChangeValue(value, 'type')}
-              />
-            </FormControl>
+            {isEqual(action, 'New') && (
+              <FormControl>
+                <FormControl.Label>Type</FormControl.Label>
+                <Picker
+                  placeholder="Choose Type"
+                  options={TYPES}
+                  selectedValue={formik.values.type}
+                  handlePressSelect={value => handleChangeValue(value, 'type')}
+                />
+              </FormControl>
+            )}
             <FormControl>
               <FormControl.Label>Date</FormControl.Label>
               <DatePicker
@@ -171,7 +263,7 @@ const Form = ({isOpen, setIsOpen}: IForm) => {
                 {formik.errors.amount}
               </FormControl.ErrorMessage>
             </FormControl>
-            {isEqual(formik.values.type, 'Expense') && (
+            {!isEqual(formik.values.type, 'Income') && (
               <FormControl isInvalid={has(formik.errors, 'category')}>
                 <FormControl.Label>Category</FormControl.Label>
                 <Picker
@@ -187,6 +279,19 @@ const Form = ({isOpen, setIsOpen}: IForm) => {
                   leftIcon={<WarningOutlineIcon size="xs" />}>
                   {formik.errors.category}
                 </FormControl.ErrorMessage>
+              </FormControl>
+            )}
+            {isEqual(formik.values.type, 'Subscription') && (
+              <FormControl>
+                <FormControl.Label>Status</FormControl.Label>
+                <Picker
+                  placeholder="Choose Status"
+                  options={STATUS}
+                  selectedValue={formik.values.status}
+                  handlePressSelect={value =>
+                    handleChangeValue(value, 'status')
+                  }
+                />
               </FormControl>
             )}
             <FormControl>

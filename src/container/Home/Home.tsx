@@ -112,7 +112,12 @@ const Home = ({navigation}: HomeScreenProps) => {
   return (
     <Box flex={1} safeAreaTop bgColor="#ffffff">
       <AppHeader label="Home" />
-      <Form isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <Form
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        type="Expense"
+        action="New"
+      />
       <Box h="25%" p={5} justifyContent="center">
         <VStack space={3}>
           <Box bgColor="tertiary.400" p={8} borderRadius="2xl">
