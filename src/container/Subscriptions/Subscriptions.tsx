@@ -195,7 +195,7 @@ const Subscriptions = () => {
         ref={ref => (row[index] = ref)}>
         <Card
           icon="calendar-month"
-          amount={formatAmount(item.amount)}
+          amount={`₱${formatAmount(item.amount)}`}
           date={moment(item.date).format('Do [of the month]')}
           description={item.description}
         />

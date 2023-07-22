@@ -202,7 +202,7 @@ const Home = ({navigation}: HomeScreenProps) => {
           renderItem={({item}) => (
             <Card
               icon="currency-php"
-              amount={formatAmount(item.amount)}
+              amount={`₱${formatAmount(item.amount)}`}
               description={item.description}
               date={moment(item.date).format('ddd, MMM DD YYYY')}
               handlePress={() => {}}

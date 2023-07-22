@@ -46,7 +46,7 @@ const Card = ({icon, description, date, amount, handlePress}: ICard) => {
       </VStack>
       <VStack alignItems="flex-end">
         <Text bold color="secondary.400" fontSize="md">
-          {`₱${amount}`}
+          {amount}
         </Text>
       </VStack>
     </HStack>

@@ -5,7 +5,6 @@ export class Debt extends Realm.Object<Debt> {
   date!: Date;
   description!: string;
   amount!: number;
-  status!: string;
   notes!: string;
   static schema = {
     name: 'Debt',
@@ -14,7 +13,6 @@ export class Debt extends Realm.Object<Debt> {
       date: 'date',
       description: 'string',
       amount: 'float',
-      status: 'string',
       notes: 'string',
     },
     primaryKey: '_id',

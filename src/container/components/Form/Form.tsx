@@ -25,7 +25,7 @@ type ObjectClassSubscription<Subscription> = Subscription;
 interface IForm {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  type: 'Expense' | 'Subscription' | 'Income';
+  type: 'Expense' | 'Subscription' | 'Income' | 'Debt';
   action: 'New' | 'Edit';
   subscription?: ObjectClassSubscription<any>;
 }
@@ -42,6 +42,10 @@ const TYPES = [
   {
     label: 'Subscription',
     value: 'Subscription',
+  },
+  {
+    label: 'Debt',
+    value: 'Debt',
   },
 ];
 
@@ -117,6 +121,24 @@ const TYPE = {
       notes: Yup.string(),
     }),
   },
+  Debt: {
+    initialValues: {
+      type: 'Debt',
+      date: moment().format('YYYY-MM-DD'),
+      description: '',
+      amount: '',
+      notes: '',
+    },
+    validationSchema: Yup.object({
+      type: Yup.string().required('This is a required field'),
+      date: Yup.string().required('This is a required field'),
+      description: Yup.string().required('This is a required field'),
+      amount: Yup.number()
+        .typeError('Please enter a valid number')
+        .required('This is a required field'),
+      notes: Yup.string(),
+    }),
+  },
 };
 
 const Form = ({isOpen, setIsOpen, type, action, subscription}: IForm) => {
@@ -152,10 +174,19 @@ const Form = ({isOpen, setIsOpen, type, action, subscription}: IForm) => {
           date: moment(values.date).toDate(),
           description: values.description,
           amount: +parseFloat(values.amount).toFixed(2),
-          category: realm.objectForPrimaryKey('Category', values?.category),
           status: values?.status,
           notes: values.notes,
         };
+
+        if (
+          isEqual(values.type, 'Subscription') ||
+          isEqual(values.type, 'Expense')
+        ) {
+          data = {
+            ...data,
+            category: realm.objectForPrimaryKey('Category', values?.category),
+          };
+        }
 
         realm.write(() => {
           realm.create(values.type, data);
@@ -263,7 +294,8 @@ const Form = ({isOpen, setIsOpen, type, action, subscription}: IForm) => {
                 {formik.errors.amount}
               </FormControl.ErrorMessage>
             </FormControl>
-            {!isEqual(formik.values.type, 'Income') && (
+            {(isEqual(formik.values.type, 'Expense') ||
+              isEqual(formik.values.type, 'Subscription')) && (
               <FormControl isInvalid={has(formik.errors, 'category')}>
                 <FormControl.Label>Category</FormControl.Label>
                 <Picker

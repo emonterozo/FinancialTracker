@@ -1,21 +1,18 @@
 import {Realm} from '@realm/react';
+import {Debt} from './Debt';
 
 export class History extends Realm.Object<History> {
   _id!: Realm.BSON.UUID;
   date!: Date;
-  description!: string;
   amount!: number;
-  notes!: string;
-  category!: string;
+  debt?: Debt;
   static schema = {
     name: 'History',
     properties: {
       _id: 'uuid',
       date: 'date',
-      description: 'string',
       amount: 'float',
-      notes: 'string',
-      category: 'string',
+      debt: 'Debt?',
     },
     primaryKey: '_id',
   };
