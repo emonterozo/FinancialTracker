@@ -6,6 +6,7 @@ import Picker from './Picker/Picker';
 import MonthYearPicker from './MonthYearPicker/MonthYearPicker';
 import EmptyData from './EmptyData/EmptyData';
 import ConfirmationDialog from './ConfirmationDialog/ConfirmationDialog';
+import Percentage from './Percentage/Percentage';
 
 export {
   BottomNavigation,
@@ -16,4 +17,5 @@ export {
   MonthYearPicker,
   EmptyData,
   ConfirmationDialog,
+  Percentage,
 };

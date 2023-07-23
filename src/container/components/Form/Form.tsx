@@ -25,7 +25,7 @@ type ObjectClassSubscription<Subscription> = Subscription;
 interface IForm {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  type: 'Expense' | 'Subscription' | 'Income' | 'Debt';
+  type: 'Expense' | 'Subscription' | 'Income' | 'Debt' | 'Goal';
   action: 'New' | 'Edit';
   subscription?: ObjectClassSubscription<any>;
 }
@@ -42,6 +42,10 @@ const TYPES = [
   {
     label: 'Subscription',
     value: 'Subscription',
+  },
+  {
+    label: 'Goal',
+    value: 'Goal',
   },
   {
     label: 'Debt',
@@ -124,6 +128,24 @@ const TYPE = {
   Debt: {
     initialValues: {
       type: 'Debt',
+      date: moment().format('YYYY-MM-DD'),
+      description: '',
+      amount: '',
+      notes: '',
+    },
+    validationSchema: Yup.object({
+      type: Yup.string().required('This is a required field'),
+      date: Yup.string().required('This is a required field'),
+      description: Yup.string().required('This is a required field'),
+      amount: Yup.number()
+        .typeError('Please enter a valid number')
+        .required('This is a required field'),
+      notes: Yup.string(),
+    }),
+  },
+  Goal: {
+    initialValues: {
+      type: 'Goal',
       date: moment().format('YYYY-MM-DD'),
       description: '',
       amount: '',

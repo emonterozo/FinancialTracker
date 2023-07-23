@@ -222,7 +222,7 @@ const DebtModule = () => {
                   <Box bgColor="gray.100" p={2} my={1}>
                     <Text>
                       Pay an amount of{' '}
-                      <Text bold>{formatAmount(item.amount)}</Text> on{' '}
+                      <Text bold>{`₱${formatAmount(item.amount)}`}</Text> on{' '}
                       <Text bold>
                         {moment(item.date).format('ddd, MMM DD YYYY hh:mm A')}
                       </Text>
