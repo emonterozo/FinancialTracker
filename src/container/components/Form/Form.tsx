@@ -1,4 +1,10 @@
-import React, {useState, Dispatch, SetStateAction, useEffect} from 'react';
+import React, {
+  useState,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useContext,
+} from 'react';
 import {
   Input,
   Modal,
@@ -11,13 +17,15 @@ import {
 import moment from 'moment';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
-import {has, isEqual, isEmpty} from 'lodash';
+import {has, isEqual, isEmpty, isNull} from 'lodash';
 
 import {DatePicker, Picker} from '../../../components';
 import {RealmContext} from '../../../models';
 import {Category} from '../../../models/Category';
 import {Subscription} from '../../../models/Subscription';
 import {IOption} from '../../../types/components/types';
+import GlobalContext from '../../../context/context';
+import {Account} from '../../../models/Account';
 const {useQuery, useRealm} = RealmContext;
 
 type ObjectClassSubscription<Subscription> = Subscription;
@@ -164,13 +172,14 @@ const TYPE = {
 };
 
 const Form = ({isOpen, setIsOpen, type, action, subscription}: IForm) => {
+  const {userId} = useContext(GlobalContext);
   const categories = useQuery(Category);
   const realm = useRealm();
   const [categoryOptions, setCategoryOptions] = useState<IOption[]>([]);
 
   const formik = useFormik({
     ...TYPE[type],
-    onSubmit: async values => {
+    onSubmit: values => {
       if (isEqual(action, 'Edit')) {
         const object = realm.objectForPrimaryKey(
           Subscription,
@@ -213,6 +222,24 @@ const Form = ({isOpen, setIsOpen, type, action, subscription}: IForm) => {
         realm.write(() => {
           realm.create(values.type, data);
         });
+
+        if (
+          (isEqual(values.type, 'Income') ||
+            isEqual(values.type, 'Expense') ||
+            isEqual(values.type, 'Debt')) &&
+          !isNull(userId)
+        ) {
+          const user = realm.objectForPrimaryKey(Account, userId);
+          const amount = +parseFloat(values.amount).toFixed(2);
+
+          if (user) {
+            realm.write(() => {
+              user.amount = isEqual(values.type, 'Income')
+                ? user.amount + amount
+                : user.amount - amount;
+            });
+          }
+        }
       }
 
       formik.resetForm();

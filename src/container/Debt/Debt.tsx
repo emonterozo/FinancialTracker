@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Box,
   Icon,
@@ -32,8 +32,10 @@ import {Form} from '../components';
 import {globalStyle} from '../../styles/styles';
 import {RealmContext} from '../../models';
 import {Debt} from '../../models/Debt';
+import {Account} from '../../models/Account';
 import {formatAmount} from '../../utils/utils';
 import {History} from '../../models/History';
+import GlobalContext from '../../context/context';
 const {useRealm} = RealmContext;
 
 const ACTIONS = [
@@ -62,6 +64,7 @@ const DebtModule = () => {
   const realm = useRealm();
   let row: Array<any> = [];
   let prevOpenedRow: any;
+  const {userId} = useContext(GlobalContext);
   const [debt, setDebt] = useState<ObjectClassDebt<any>[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -88,14 +91,22 @@ const DebtModule = () => {
         realm.write(() => {
           object.amount = balance < 0 ? 0 : balance;
         });
+        const data = {
+          _id: new Realm.BSON.UUID(),
+          date: moment().toDate(),
+          amount: +parseFloat(values.amount).toFixed(2),
+          debt: realm.objectForPrimaryKey('Debt', selectedDebt?._id),
+        };
         realm.write(() => {
-          realm.create('History', {
-            _id: new Realm.BSON.UUID(),
-            date: moment().toDate(),
-            amount: +parseFloat(values.amount).toFixed(2),
-            debt: realm.objectForPrimaryKey('Debt', selectedDebt?._id),
-          });
+          realm.create('History', data);
         });
+
+        const user = realm.objectForPrimaryKey(Account, userId);
+        if (user) {
+          realm.write(() => {
+            user.amount = user.amount + data.amount;
+          });
+        }
         setIsPaymentOpen(false);
       }
       formik.resetForm();

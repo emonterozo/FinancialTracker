@@ -20,6 +20,8 @@
 		5657C163FFEF4B6C80B7D723 /* Nunito-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E270C06CE0BE4E57BF664FE3 /* Nunito-SemiBold.ttf */; };
 		6C649E7EF469453289D12EA2 /* Nunito-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DB9AA4D2EF83423A9ADADF1A /* Nunito-ExtraLightItalic.ttf */; };
 		720564112A61298900DB2EFD /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 720564102A61298900DB2EFD /* MaterialCommunityIcons.ttf */; };
+		72794E3A2A6D097A00BB5249 /* splash.json in Resources */ = {isa = PBXBuildFile; fileRef = 72794E392A6D097A00BB5249 /* splash.json */; };
+		72794E3D2A6D0C2C00BB5249 /* Dynamic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72794E3C2A6D0C2C00BB5249 /* Dynamic.swift */; };
 		72F4B365FA334FB3BC6BC6B3 /* Nunito-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 84F1EA0A3C174416AF85DD40 /* Nunito-Light.ttf */; };
 		7699B88040F8A987B510C191 /* libPods-FinancialTracker-FinancialTrackerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-FinancialTracker-FinancialTrackerTests.a */; };
 		80A3DC60092C427A95917EEA /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 996301BB62A84CBFBFD7E312 /* Nunito-Regular.ttf */; };
@@ -60,6 +62,9 @@
 		615F2792F096447C91A6B0CD /* Nunito-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Nunito-ExtraBold.ttf"; path = "../src/assets/fonts/Nunito-ExtraBold.ttf"; sourceTree = "<group>"; };
 		63A4F2CAC00A4BC0819C364B /* Nunito-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Nunito-LightItalic.ttf"; path = "../src/assets/fonts/Nunito-LightItalic.ttf"; sourceTree = "<group>"; };
 		720564102A61298900DB2EFD /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = MaterialCommunityIcons.ttf; path = ../../../Desktop/MaterialCommunityIcons.ttf; sourceTree = "<group>"; };
+		72794E392A6D097A00BB5249 /* splash.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = splash.json; path = ../../../Downloads/splash.json; sourceTree = "<group>"; };
+		72794E3B2A6D0C2C00BB5249 /* FinancialTracker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FinancialTracker-Bridging-Header.h"; sourceTree = "<group>"; };
+		72794E3C2A6D0C2C00BB5249 /* Dynamic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dynamic.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FinancialTracker/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84F1EA0A3C174416AF85DD40 /* Nunito-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Nunito-Light.ttf"; path = "../src/assets/fonts/Nunito-Light.ttf"; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-FinancialTracker-FinancialTrackerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FinancialTracker-FinancialTrackerTests.release.xcconfig"; path = "Target Support Files/Pods-FinancialTracker-FinancialTrackerTests/Pods-FinancialTracker-FinancialTrackerTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -116,6 +121,7 @@
 		13B07FAE1A68108700A75B9A /* FinancialTracker */ = {
 			isa = PBXGroup;
 			children = (
+				72794E392A6D097A00BB5249 /* splash.json */,
 				72145A782A60152000652F30 /* Fonts */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
@@ -123,6 +129,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				72794E3C2A6D0C2C00BB5249 /* Dynamic.swift */,
+				72794E3B2A6D0C2C00BB5249 /* FinancialTracker-Bridging-Header.h */,
 			);
 			name = FinancialTracker;
 			sourceTree = "<group>";
@@ -268,7 +276,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1430;
 					};
 				};
 			};
@@ -309,6 +317,7 @@
 				C0FA0F3345B64596BC1A97C9 /* Nunito-BlackItalic.ttf in Resources */,
 				9F4BEC74DB0545B68F3308C5 /* Nunito-Bold.ttf in Resources */,
 				10A01CD8B6134913829D2C6B /* Nunito-BoldItalic.ttf in Resources */,
+				72794E3A2A6D097A00BB5249 /* splash.json in Resources */,
 				1C16768955F04F8EBC73D132 /* Nunito-ExtraBold.ttf in Resources */,
 				E10F1AD15AFE4511885AAA3C /* Nunito-ExtraLight.ttf in Resources */,
 				6C649E7EF469453289D12EA2 /* Nunito-ExtraLightItalic.ttf in Resources */,
@@ -488,6 +497,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72794E3D2A6D0C2C00BB5249 /* Dynamic.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
@@ -508,6 +518,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-FinancialTracker-FinancialTrackerTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -535,6 +546,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 89C6BE57DB24E9ADA2F236DE /* Pods-FinancialTracker-FinancialTrackerTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = FinancialTrackerTests/Info.plist;
@@ -562,6 +574,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = FinancialTracker/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -576,6 +589,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = FinancialTracker;
+				SWIFT_OBJC_BRIDGING_HEADER = "FinancialTracker-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -589,6 +603,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = FinancialTracker/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -602,6 +617,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = FinancialTracker;
+				SWIFT_OBJC_BRIDGING_HEADER = "FinancialTracker-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

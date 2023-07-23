@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Box,
   Text,
@@ -13,7 +13,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {BarChart} from 'react-native-gifted-charts';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import moment from 'moment';
-import {isEmpty, groupBy, sumBy, isEqual} from 'lodash';
+import {isEmpty, groupBy, sumBy, isEqual, isNull} from 'lodash';
 import {useIsFocused} from '@react-navigation/native';
 
 import {AppHeader, BottomNavigation, Card} from '../../components';
@@ -24,12 +24,14 @@ import {RealmContext} from '../../models';
 import {Account} from '../../models/Account';
 import {Expense} from '../../models/Expense';
 import {formatAmount, formatTotalAmount} from '../../utils/utils';
+import GlobalContext from '../../context/context';
 const {useRealm} = RealmContext;
 
 type ObjectClassExpense<Expense> = Expense;
 
 const Home = ({navigation}: HomeScreenProps) => {
   const realm = useRealm();
+  const {userId} = useContext(GlobalContext);
   const isFocused = useIsFocused();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState({
@@ -109,6 +111,16 @@ const Home = ({navigation}: HomeScreenProps) => {
     getYearExpense();
   }, [selectedDate, isModalOpen, isFocused]);
 
+  const getBalance = () => {
+    let amount = 0;
+    if (!isNull(userId)) {
+      const data = realm.objectForPrimaryKey(Account, userId);
+      amount = data?.amount || 0;
+    }
+
+    return `₱${formatAmount(amount)}`;
+  };
+
   return (
     <Box flex={1} safeAreaTop bgColor="#ffffff">
       <AppHeader label="Home" />
@@ -125,7 +137,7 @@ const Home = ({navigation}: HomeScreenProps) => {
               Total Balance
             </Text>
             <Heading mt={1} color="white">
-              ₱0.00
+              {getBalance()}
             </Heading>
             <Box mt="5">
               <LinearGradient

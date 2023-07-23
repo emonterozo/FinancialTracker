@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Box,
   Icon,
@@ -35,6 +35,8 @@ import {RealmContext} from '../../models';
 import {Goal} from '../../models/Goal';
 import {formatAmount} from '../../utils/utils';
 import {History} from '../../models/History';
+import {Account} from '../../models/Account';
+import GlobalContext from '../../context/context';
 const {useRealm} = RealmContext;
 
 const ACTIONS = [
@@ -63,6 +65,7 @@ const Goals = () => {
   const realm = useRealm();
   let row: Array<any> = [];
   let prevOpenedRow: any;
+  const {userId} = useContext(GlobalContext);
   const [goals, setGoals] = useState<ObjectClassGoal<any>[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -89,14 +92,23 @@ const Goals = () => {
         realm.write(() => {
           object.balance = balance;
         });
+        const data = {
+          _id: new Realm.BSON.UUID(),
+          date: moment().toDate(),
+          amount: +parseFloat(values.amount).toFixed(2),
+          goal: realm.objectForPrimaryKey('Goal', selectedGoal?._id),
+        };
         realm.write(() => {
-          realm.create('History', {
-            _id: new Realm.BSON.UUID(),
-            date: moment().toDate(),
-            amount: +parseFloat(values.amount).toFixed(2),
-            goal: realm.objectForPrimaryKey('Goal', selectedGoal?._id),
-          });
+          realm.create('History', data);
         });
+
+        const user = realm.objectForPrimaryKey(Account, userId);
+        if (user) {
+          realm.write(() => {
+            user.amount = user.amount - data.amount;
+          });
+        }
+
         setIsPaymentOpen(false);
       }
       formik.resetForm();
@@ -174,7 +186,7 @@ const Goals = () => {
   const getPercentage = () => {
     const percentage = (selectedGoal?.balance / selectedGoal?.amount) * 100;
 
-    return percentage > 100 ? '100%' : `${percentage}%`;
+    return percentage > 100 ? '100%' : `${Math.round(percentage)}%`;
   };
 
   return (

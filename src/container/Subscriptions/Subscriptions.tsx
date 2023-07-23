@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Box,
   Icon,
@@ -25,6 +25,8 @@ import {globalStyle} from '../../styles/styles';
 import {RealmContext} from '../../models';
 import {Subscription} from '../../models/Subscription';
 import {formatAmount} from '../../utils/utils';
+import GlobalContext from '../../context/context';
+import {Account} from '../../models/Account';
 const {useRealm} = RealmContext;
 
 const ACTIONS = [
@@ -78,6 +80,7 @@ type ISubscriptionProps = {
 
 const Subscriptions = () => {
   const realm = useRealm();
+  const {userId} = useContext(GlobalContext);
   let row: Array<any> = [];
   let prevOpenedRow: any;
   const [subscriptions, setSubscriptions] = useState<
@@ -152,6 +155,12 @@ const Subscriptions = () => {
     realm.write(() => {
       realm.create('Expense', data);
     });
+    const user = realm.objectForPrimaryKey(Account, userId);
+    if (user) {
+      realm.write(() => {
+        user.amount = user.amount - data.amount;
+      });
+    }
     setIsPaymentOpen(false);
   };
 
